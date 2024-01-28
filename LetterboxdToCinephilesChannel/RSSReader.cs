@@ -13,15 +13,14 @@ namespace LetterboxdToCinephilesChannel
         ChannelCalls calls = new ChannelCalls();
         internal void Execute()
         {
-            //SQLitePCL.Batteries.Init();
-
+            
             InitializeDatabase();
 
             // Run the loop indefinitely
             while (true)
             {
-                //string[] urls = Environment.GetEnvironmentVariable("RSS_URLS").Split(',');
-                string[] urls = { "https://letterboxd.com/waffle1234/rss", "https://letterboxd.com/Azaghast/rss", "https://letterboxd.com/Azaghast/rss" };
+                string rss = Environment.GetEnvironmentVariable("RSS_URLS");
+                string[] urls = rss.Split(',');
 
 
                 foreach (string url in urls)
@@ -38,7 +37,6 @@ namespace LetterboxdToCinephilesChannel
                         {
                             InsertEntry(textExtract);
                             Console.WriteLine(textExtract);
-                            //calls.SendMessageAsync(textExtract);
                             calls.SendPhotoAsync(parsedData);
                         }
                         
@@ -98,8 +96,6 @@ namespace LetterboxdToCinephilesChannel
             }
         }
 
-
-
         static string DownloadXmlContent(string url)
         {
             try
@@ -136,7 +132,7 @@ namespace LetterboxdToCinephilesChannel
                 message.FilmYear = latestItem.SelectSingleNode(".//letterboxd:filmYear", nsManager)?.InnerText;
                 message.MemberRating = latestItem.SelectSingleNode(".//letterboxd:memberRating", nsManager)?.InnerText;
                 message.TotalRating = "5";
-
+                message.Creator = FindCreator(latestItem.LastChild.InnerText);
                 string description = latestItem.SelectSingleNode(".//description", nsManager)?.InnerText.Trim();
                 string descriptionhtml = WebUtility.HtmlDecode(description);
 
@@ -162,6 +158,36 @@ namespace LetterboxdToCinephilesChannel
 
             }
 
+        }
+
+        static string FindCreator(string username)
+        {
+            // Define a default value in case the environment variable is not set
+            string defaultCreator = "Who?";
+
+            // Read the environment variable containing the username-to-creator mapping
+            string usernameMappingEnv = Environment.GetEnvironmentVariable("USERNAME_CREATOR_MAPPING");
+
+            // Parse the environment variable value into a dictionary
+            Dictionary<string, string> usernameToCreatorMapping = new Dictionary<string, string>();
+            if (!string.IsNullOrEmpty(usernameMappingEnv))
+            {
+                string[] mappingPairs = usernameMappingEnv.Split(',');
+
+                foreach (string pair in mappingPairs)
+                {
+                    string[] keyValue = pair.Split(':');
+                    if (keyValue.Length == 2)
+                    {
+                        usernameToCreatorMapping[keyValue[0].Trim()] = keyValue[1].Trim();
+                    }
+                }
+            }
+
+            // Set the creator based on the mapping or use the default value
+            return usernameToCreatorMapping.ContainsKey(username)
+                ? usernameToCreatorMapping[username]
+            : defaultCreator;
         }
 
     }

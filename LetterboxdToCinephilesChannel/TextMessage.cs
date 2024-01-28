@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LetterboxdToCinephilesChannel
+﻿namespace LetterboxdToCinephilesChannel
 {
     internal class TextMessage
     {
@@ -16,5 +9,6 @@ namespace LetterboxdToCinephilesChannel
         public string TotalRating { get; set; }
         public string ImgSrc  { get; set; }
         public string Review { get; set; }
-}
+        public string Creator { get; set; }
+    }
 }
