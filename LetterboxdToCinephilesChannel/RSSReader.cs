@@ -35,9 +35,10 @@ namespace LetterboxdToCinephilesChannel
 
                         if (!EntryExists(textExtract) && !string.IsNullOrWhiteSpace(textExtract))
                         {
+                            calls.SendPhotoAsync(parsedData);
                             InsertEntry(textExtract);
                             Console.WriteLine(textExtract);
-                            calls.SendPhotoAsync(parsedData);
+                            
                         }
                         
                     }
@@ -130,7 +131,8 @@ namespace LetterboxdToCinephilesChannel
             {
                 message.FilmTitle = latestItem.SelectSingleNode(".//letterboxd:filmTitle", nsManager)?.InnerText;
                 message.FilmYear = latestItem.SelectSingleNode(".//letterboxd:filmYear", nsManager)?.InnerText;
-                message.MemberRating = latestItem.SelectSingleNode(".//letterboxd:memberRating", nsManager)?.InnerText;
+                message.MemberRating = string.IsNullOrEmpty(latestItem.SelectSingleNode(".//letterboxd:memberRating", nsManager)?.InnerText) ? string.Empty : latestItem.SelectSingleNode(".//letterboxd:memberRating", nsManager).InnerText;
+                if (!string.IsNullOrWhiteSpace(message.MemberRating))
                 message.TotalRating = "5";
                 message.Creator = FindCreator(latestItem.LastChild.InnerText);
                 string description = latestItem.SelectSingleNode(".//description", nsManager)?.InnerText.Trim();
@@ -154,7 +156,7 @@ namespace LetterboxdToCinephilesChannel
                 message.ImgSrc = doc.DocumentNode.SelectSingleNode("//img")?.Attributes["src"]?.Value;
 
                 // Extract comments
-                message.Review = doc.DocumentNode.SelectSingleNode("//p[last()]")?.InnerText;
+                message.Review = (doc.DocumentNode.SelectSingleNode("//p[last()]")?.InnerText).StartsWith("Watched on") ? string.Empty : doc.DocumentNode.SelectSingleNode("//p[last()]").InnerText;
 
             }
 

@@ -19,7 +19,9 @@ namespace LetterboxdToCinephilesChannel
                 Console.WriteLine("Telegram bot token is missing. Set the TELEGRAM_BOT_TOKEN environment variable.");
                 return;
             }
-            string caption = $"**{EscapeForMarkdown(parsedData.FilmTitle)}\\({EscapeForMarkdown(parsedData.FilmYear)}\\) ** \n{EscapeForMarkdown(parsedData.MemberRating)}\\/{EscapeForMarkdown(parsedData.TotalRating)}\n{EscapeForMarkdown(parsedData.Review)}\n \\- `{EscapeForMarkdown(parsedData.Creator)}`";
+            string caption = !string.IsNullOrEmpty(parsedData.MemberRating) ?
+            $"**{EscapeForMarkdown(parsedData.FilmTitle)}\\({EscapeForMarkdown(parsedData.FilmYear)}\\) ** \n{EscapeForMarkdown(parsedData.MemberRating)}\\/{EscapeForMarkdown(parsedData.TotalRating)}\n{EscapeForMarkdown(parsedData.Review)}\n \\- `{EscapeForMarkdown(parsedData.Creator)}`" : $"**{EscapeForMarkdown(parsedData.FilmTitle)}\\({EscapeForMarkdown(parsedData.FilmYear)}\\) **\n{EscapeForMarkdown(parsedData.Review)}\n \\- `{EscapeForMarkdown(parsedData.Creator)}`";
+
             botClient = new TelegramBotClient(Token);
 
             ReceiverOptions receiverOptions = new()
