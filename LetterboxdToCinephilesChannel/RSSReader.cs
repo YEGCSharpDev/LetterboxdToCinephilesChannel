@@ -11,6 +11,7 @@ namespace LetterboxdToCinephilesChannel
         private static string databasePath = "entries.db";
         private static string tableName = "LatestEntries";
         ChannelCalls calls = new ChannelCalls();
+        GetMovieInfo movieinfo = new GetMovieInfo();
         internal void Execute()
         {
             
@@ -35,7 +36,8 @@ namespace LetterboxdToCinephilesChannel
 
                         if (!EntryExists(textExtract) && !string.IsNullOrWhiteSpace(textExtract))
                         {
-                            calls.SendPhotoAsync(parsedData);
+                            var movieInfo = movieinfo.GetInfoAsync(parsedData);
+                            calls.SendPhotoAsync(parsedData,movieInfo.Result);
                             InsertEntry(textExtract);
                             Console.WriteLine(textExtract);
                             
