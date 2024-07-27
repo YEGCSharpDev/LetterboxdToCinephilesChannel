@@ -6,10 +6,10 @@ on:
     tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch:  # Allows manual triggering of the workflow
+  workflow_dispatch:
 
 env:
-  DOCKER_HUB_REPO: ${{ secrets.DOCKER_USERNAME }}/${{ github.repository_name }}
+  DOCKER_HUB_REPO: ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}
 
 jobs:
   build:
@@ -27,18 +27,22 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract repository name
-        id: repo-name
-        run: echo "REPO_NAME=$(echo ${{ github.repository }} | cut -d'/' -f2)" >> $GITHUB_OUTPUT
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/${{ steps.repo-name.outputs.REPO_NAME }}:latest
-            ${{ secrets.DOCKER_USERNAME }}/${{ steps.repo-name.outputs.REPO_NAME }}:${{ github.sha }}
+            ${{ env.DOCKER_HUB_REPO }}:latest
+            ${{ env.DOCKER_HUB_REPO }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Check Docker Hub login
+        if: failure()
+        run: |
+          echo "Docker Hub login failed. Checking credentials..."
+          echo "DOCKER_USERNAME secret exists: ${{ secrets.DOCKER_USERNAME != '' }}"
+          echo "DOCKER_PASSWORD secret exists: ${{ secrets.DOCKER_PASSWORD != '' }}"
+          echo "Attempting manual login..."
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
