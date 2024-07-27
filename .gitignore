@@ -396,3 +396,5 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+LetterboxdToCinephilesChannel/entries.db
+LetterboxdToCinephilesChannel/Properties/launchSettings.json
